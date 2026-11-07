@@ -1,0 +1,58 @@
+name: Release
+
+# Tag-driven release: push a tag `v*` → minified release APK is attached to
+# a GitHub Release together with its SHA-256 checksum.
+# Uses the built-in GITHUB_TOKEN — no PAT required.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build • Publish Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Assemble release APK
+        run: ./gradlew :app:assembleRelease --stacktrace
+
+      - name: Rename artifact
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk \
+             "RotinaCheck-${{ github.ref_name }}.apk"
+
+      - name: Compute SHA-256
+        run: |
+          sha256sum "RotinaCheck-${{ github.ref_name }}.apk" \
+            > "RotinaCheck-${{ github.ref_name }}.apk.sha256"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: RotinaCheck ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref_name, '-test') }}
+          generate_release_notes: true
+          files: |
+            RotinaCheck-${{ github.ref_name }}.apk
+            RotinaCheck-${{ github.ref_name }}.apk.sha256
