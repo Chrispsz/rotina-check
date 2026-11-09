@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Environment
 import androidx.core.content.FileProvider
 import androidx.datastore.preferences.core.edit
@@ -167,7 +168,7 @@ class GitHubSmartUpdate(
         }
         runCatching {
             val name = "RotinaCheck-v${info.version}.apk"
-            val request = DownloadManager.Request(Uri.parse(info.apkUrl)).apply {
+            val request = DownloadManager.Request(info.apkUrl.toUri()).apply {
                 setTitle("RotinaCheck v${info.version}")
                 setMimeType("application/vnd.android.package-archive")
                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
@@ -227,10 +228,10 @@ class GitHubSmartUpdate(
         val info = (_state.value as? State.Available)?.info
         val url = info?.apkUrl ?: info?.pageUrl ?: releasesPage
         runCatching {
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         }.onFailure {
             runCatching {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info?.pageUrl ?: releasesPage)))
+                context.startActivity(Intent(Intent.ACTION_VIEW, (info?.pageUrl ?: releasesPage).toUri()))
             }
         }
     }
