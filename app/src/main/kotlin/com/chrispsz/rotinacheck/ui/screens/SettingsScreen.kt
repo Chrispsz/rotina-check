@@ -3,7 +3,6 @@ package com.chrispsz.rotinacheck.ui.screens
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,9 +49,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chrispsz.rotinacheck.R
+import com.chrispsz.rotinacheck.update.GitHubSmartUpdate
 import com.chrispsz.rotinacheck.viewmodel.RoutineViewModel
 import com.chrispsz.rotinacheck.viewmodel.UiState
+import com.chrispsz.rotinacheck.viewmodel.UpdateViewModel
+import kotlinx.coroutines.delay
 
 /**
  * Settings: import/export (SAF), alerts toggle, restore the bundled example
@@ -61,11 +67,31 @@ import com.chrispsz.rotinacheck.viewmodel.UiState
 fun SettingsScreen(
     ui: UiState,
     vm: RoutineViewModel,
+    update: UpdateViewModel,
     onImport: () -> Unit,
     onExport: () -> Unit,
 ) {
     val context = LocalContext.current
     var showClearDialog by remember { mutableStateOf(false) }
+
+    // ---- Atualizações (OTA) ----------------------------------------------------
+    val updateState by update.state.collectAsStateWithLifecycle()
+    val updateFeedback by update.feedback.collectAsStateWithLifecycle()
+    var checkStatus by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(updateFeedback) {
+        when (updateFeedback) {
+            GitHubSmartUpdate.Feedback.UP_TO_DATE ->
+                checkStatus = context.getString(R.string.settings_updates_up_to_date)
+            GitHubSmartUpdate.Feedback.CHECK_FAILED ->
+                checkStatus = context.getString(R.string.settings_updates_failed)
+            null -> Unit
+        }
+        if (updateFeedback != null) {
+            delay(4_000)
+            update.consumeFeedback()
+            checkStatus = null
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
@@ -186,6 +212,82 @@ fun SettingsScreen(
                 Text(stringResource(R.string.settings_export))
             }
 
+            // ---- Atualizações (OTA leve via GitHub Releases) ------------------------
+            Card(
+                Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            ) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(
+                        stringResource(R.string.settings_updates_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        stringResource(R.string.settings_updates_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        stringResource(R.string.settings_version_installed, update.installedVersion),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    when (val st = updateState) {
+                        is GitHubSmartUpdate.State.Checking -> Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.settings_updates_checking),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        is GitHubSmartUpdate.State.Available -> {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                stringResource(R.string.settings_updates_available, st.info.version),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            if (st.info.notes.isNotBlank()) {
+                                Text(
+                                    st.info.notes,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 4,
+                                )
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Button(onClick = update::openDownload, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(R.string.settings_updates_download))
+                            }
+                            TextButton(
+                                onClick = update::ignoreCurrent,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                            ) {
+                                Text(stringResource(R.string.update_ignore_version))
+                            }
+                        }
+                        else -> Unit
+                    }
+                    checkStatus?.let { status ->
+                        Text(
+                            status,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(onClick = update::checkNow, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.settings_updates_check_now))
+                    }
+                }
+            }
+
             TextButton(
                 onClick = { showClearDialog = true },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
@@ -221,7 +323,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun BannerCard(modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
+private fun BannerCard(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

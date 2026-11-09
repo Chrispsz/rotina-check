@@ -57,12 +57,15 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chrispsz.rotinacheck.R
 import com.chrispsz.rotinacheck.data.Progress
 import com.chrispsz.rotinacheck.data.RoutineBlock
 import com.chrispsz.rotinacheck.data.RoutineDay
+import com.chrispsz.rotinacheck.ui.components.UpdateBanner
 import com.chrispsz.rotinacheck.viewmodel.RoutineViewModel
 import com.chrispsz.rotinacheck.viewmodel.UiState
+import com.chrispsz.rotinacheck.viewmodel.UpdateViewModel
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
@@ -84,6 +87,7 @@ private val DAY_LONG = listOf("Segunda", "Terça", "Quarta", "Quinta", "Sexta", 
 fun HomeScreen(
     ui: UiState,
     vm: RoutineViewModel,
+    update: UpdateViewModel,
     onImport: () -> Unit,
 ) {
     Scaffold(
@@ -115,6 +119,15 @@ fun HomeScreen(
                         )
                     }
                 },
+            )
+
+            // Discreet OTA card — only rendered when a newer release exists;
+            // hides for the session with ✕, quietly returns next open.
+            UpdateBanner(
+                state = update.state.collectAsStateWithLifecycle().value,
+                onUpdate = update::openDownload,
+                onIgnore = update::ignoreCurrent,
+                onHide = update::hideForSession,
             )
 
             if (ui.routine == null) {

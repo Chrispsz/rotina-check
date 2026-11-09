@@ -66,8 +66,20 @@ Checklist de rotina diária organizada por blocos de tempo, **um dia de cada vez
 ## 🔒 Privacidade
 
 - Todo dado vive no aparelho (DataStore local) — nada sai dele
-- Permissões: notificações, alarmes exatos e reinicialização (apenas para re-agendar os avisos)
-- Sem rede, sem analytics, sem login
+- A ÚNICA rede que o app toca é a verificação de atualização: no máximo 1 requisição por dia, direto ao GitHub Releases (detalhes em [docs/OTA-GitHub.md](docs/OTA-GitHub.md))
+- Permissões: notificações, alarmes exatos, reinicialização (re-agendar avisos) e INTERNET (só para a verificação de atualização acima)
+- Sem analytics, sem login, sem rastreamento
+
+## 🔄 Atualizações (OTA)
+
+Atualizar sem entrar no GitHub: o app verifica a release mais recente **no máximo 1× por dia** (a cada 3 dias em dados móveis) e **só com o app aberto** — nada de segundo plano, push ou bateria.
+
+- Encontrou versão nova? Um banner discreto aparece e **continua lá** (resolvido offline, sem nova rede) até você atualizar ou tocar em "Ignorar esta versão"
+- **Atualizar** abre o APK da release direto — sem navegar no repositório
+- Tags `v1.2.3-test` viram *prerelease* e **não** disparam o aviso (canal estável por padrão)
+- Falha de rede? Silêncio — no dia seguinte tenta de novo
+
+Arquitetura completa + guia de reuso para qualquer app: **[docs/OTA-GitHub.md](docs/OTA-GitHub.md)**
 
 ## 🧱 Engenharia
 
@@ -79,6 +91,7 @@ Checklist de rotina diária organizada por blocos de tempo, **um dia de cada vez
 | Bateria | Modelo passivo: **exatamente 1 alarme exato registrado por vez**, re-armado em cadeia; nada residente entre blocos |
 | Testes | JUnit 5: parser, horários, progresso, consistência, editor, agendamento e backup (round-trip) |
 | CI | Lint → testes → APK de release minificado; tag `v*` publica a release |
+| Rede | Apenas verificação de atualização — 1 req/dia em foreground, silenciosa e offline-first |
 
 AMOLED: fundo `#000000` real (janela, tema e ícone) — pixels desligados em telas OLED.
 
