@@ -45,7 +45,7 @@
     <string name="settings_export">Exportar backup (.json)</string>
     <string name="settings_clear">Limpar dados</string>
     <string name="settings_clear_confirm_title">Limpar tudo?</string>
-    <string name="settings_clear_confirm_body">Rotina, marcações e histórico serão apagados.</string>
+    <string name="settings_clear_confirm_body">Rotina, marcações e histórico serão apagados. Depois você começa de novo: exemplo, do zero ou importando um .json.</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_clear">Limpar</string>
     <string name="settings_alerts">Alertas dos blocos</string>

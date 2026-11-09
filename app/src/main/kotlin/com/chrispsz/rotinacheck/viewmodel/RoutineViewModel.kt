@@ -50,16 +50,10 @@ class RoutineViewModel(app: Application) : AndroidViewModel(app) {
     private val message = MutableStateFlow<String?>(null)
     private val selectedDateIso = MutableStateFlow<String?>(null)
 
-    init {
-        // First launch: the app opens with a GENERIC, editable example routine —
-        // no import required. "Limpar dados" sets the dismissed flag so a
-        // deliberate reset stays empty.
-        viewModelScope.launch(Dispatchers.IO) {
-            if (!store.seedDismissedNow() && store.routineNow() == null) {
-                persistRoutine(DefaultRoutine.routine())
-            }
-        }
-    }
+    // NO first-launch seed (v0.4.2): the app opens EMPTY, on the choice
+    // screen — "Usar rotina de exemplo", "Criar do zero" or "Importar .json"
+    // (EmptyState). The same screen returns after "Limpar dados". The example
+    // is opt-in, never auto-loaded.
 
     private val data = combine(
         store.routineFlow,

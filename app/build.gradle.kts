@@ -6,6 +6,23 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        // Created once by CI (keytool), cached with a FIXED cache key — every
+        // published APK keeps one stable signature → sideload OTA just works.
+        // Public repo trade-off: the password lives in the workflow files;
+        // for a sideload hobby app a STABLE signature beats key secrecy
+        // (same decision as tv-minimal).
+        if (rootProject.file("keystore/rotinacheck-release.keystore").exists() &&
+            !System.getenv("ROTINA_STORE_PASSWORD").isNullOrEmpty()
+        ) {
+            create("release") {
+                storeFile = rootProject.file("keystore/rotinacheck-release.keystore")
+                storePassword = System.getenv("ROTINA_STORE_PASSWORD")
+                keyAlias = System.getenv("ROTINA_KEY_ALIAS") ?: "rotinacheck"
+                keyPassword = System.getenv("ROTINA_KEY_PASSWORD") ?: storePassword
+            }
+        }
+    }
     namespace = "com.chrispsz.rotinacheck"
     compileSdk = 36
 
@@ -15,8 +32,8 @@ android {
         // stable, java.time is always present, no desugaring, no SDK guards.
         minSdk = 34
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.4.1"
+        versionCode = 7
+        versionName = "0.4.2"
     }
 
     buildTypes {
@@ -27,9 +44,23 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // Public repo → no keystore is committed. The debug-signed release
-            // APK stays installable and keeps the tag→release pipeline simple.
-            signingConfig = signingConfigs.getByName("debug")
+            // OTA contract: EVERY release APK must carry the SAME signature, or
+            // the in-app update fails with INSTALL_FAILED_UPDATE_INCOMPATIBLE
+            // ("conflito de pacote"). The runner's ephemeral debug keystore
+            // changed per machine — that bug shipped in v0.4.0/v0.4.1.
+            //
+            // Now: CI creates ONE release keystore and caches it across runs
+            // (fixed actions/cache key). Locally, if keystore/… exists and
+            // ROTINA_STORE_PASSWORD is set, the same key is used. Fallback =
+            // debug signing so local dev never breaks (never published —
+            // both CI workflows wire the env before assembleRelease).
+            val stableKeystore = rootProject.file("keystore/rotinacheck-release.keystore")
+            val storePassword = System.getenv("ROTINA_STORE_PASSWORD")
+            signingConfig = if (stableKeystore.exists() && !storePassword.isNullOrEmpty()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
         debug {
             applicationIdSuffix = ".debug"

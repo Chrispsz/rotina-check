@@ -34,7 +34,38 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
+      # ---- OTA: STABLE release signature --------------------------------------
+      # One keystore, created once, cached forever (fixed key). Every published
+      # APK keeps the same signature → in-app updates install without
+      # INSTALL_FAILED_UPDATE_INCOMPATIBLE. Public repo trade-off: the password
+      # lives here; a stable signature beats key secrecy for a sideload app.
+      - name: Restore stable release keystore (cached across runs)
+        id: keystore-cache
+        uses: actions/cache@v4
+        with:
+          path: keystore/rotinacheck-release.keystore
+          key: rotina-release-keystore-v1
+
+      - name: Create stable release keystore (first run only)
+        if: steps.keystore-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p keystore
+          keytool -genkeypair -v \
+            -keystore keystore/rotinacheck-release.keystore \
+            -storepass "$KEYSTORE_PASS" \
+            -alias rotinacheck \
+            -keypass "$KEYSTORE_PASS" \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=RotinaCheck, OU=App, O=Chrispsz, C=BR"
+        env:
+          KEYSTORE_PASS: rotina-check-2026
+
+
       - name: Assemble release APK
+        env:
+          ROTINA_STORE_PASSWORD: rotina-check-2026
+          ROTINA_KEY_ALIAS: rotinacheck
+          ROTINA_KEY_PASSWORD: rotina-check-2026
         run: ./gradlew :app:assembleRelease --stacktrace
 
       - name: Rename artifact
