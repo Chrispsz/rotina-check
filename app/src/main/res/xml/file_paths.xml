@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Paths exposed to the platform installer via FileProvider.
+     The OTA downloads the APK into the app's private external files dir
+     (getExternalFilesDir(null)/Download/) — external-files-path with path="."
+     covers it and every subfolder, so the installer can read the APK
+     without any storage permission. -->
+<paths>
+    <external-files-path name="updates" path="." />
+</paths>

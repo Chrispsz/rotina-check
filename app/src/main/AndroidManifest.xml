@@ -47,6 +47,20 @@
             </intent-filter>
         </activity>
 
+        <!-- One-tap OTA install: the finished APK (app-private external dir)
+             is handed to the platform installer through this provider. The
+             ACTION_VIEW path needs NO REQUEST_INSTALL_PACKAGES — the system
+             installer owns the unknown-source UX. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updateprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Thin receiver fired by the exact alarm: shows ONE discreet
              notification and chains the next event. No database, no service,
              no I/O beyond DataStore reads (goAsync) — passive battery model:

@@ -20,6 +20,7 @@ Um updater não pode ser chato. Muitos apps pecam: checam toda hora, abrem diál
 | 📶 Econômico com dados móveis | Em rede medida, só verifica de novo após 3 dias — o Wi‑Fi faz o trabalho diário |
 | 🔕 Falha silenciosa | Sem internet/timeout/erro = nada acontece; amanhã tenta de novo (e a tentativa também conta como "checado hoje") |
 | 📴 Offline-first | A atualização encontrada fica salva; o banner reaparece a cada abertura **sem rede nenhuma** |
+| 👆 Atualizar em 1 toque | Download pelo `DownloadManager` do sistema (notificação nativa, sobrevive ao fechamento do app) e instalação direta via instalador do Android — sem navegador e sem novas permissões |
 | 🙈 Ignorar esta versão | A versão ignorada nunca mais avisa; uma versão **mais nova** sempre avisa |
 | ✨ Auto-limpeza pós-atualização | Instalou a nova versão? O estado pendente é limpo comparando versões localmente — sem rede |
 | 🧪 Canal estável | `releases/latest` ignora drafts e prereleases — tags `v1.2.3-test` nunca disparam o banner |
@@ -42,22 +43,27 @@ app abre (ON_START)
                                  │
                                  ├─ ✕ → esconde só nesta sessão (volta na próxima abertura)
                                  ├─ Ignorar esta versão → nunca mais avisa (até versão nova)
-                                 └─ Atualizar → abre o .apk da release no navegador
+                                 └─ Atualizar (1 toque) ─► DownloadManager do sistema
+                                        ├─ baixando → barra de progresso no próprio banner
+                                        │    (continua mesmo se fechar o app; ao reabrir,
+                                        │     o estado é reconciliado com o DownloadManager)
+                                        └─ pronto → "Instalar agora" ─► instalador do Android
+                                             (FileProvider; sem navegador, sem procurar arquivo)
 ```
 
 ## Custo real
 
-- **Rede:** 1 GET/dia, resposta ~2–5 KB (JSON da release). Em dados móveis: no máx. 1 GET a cada 3 dias.
-- **Bateria:** zero em segundo plano. Sem WorkManager, sem AlarmManager, sem push, sem serviço. A verificação só acontece com o app aberto.
-- **Armazenamento:** 3 chaves no DataStore (dia da última checagem, versão ignorada, JSON pendente).
+- **Rede:** 1 GET/dia, resposta ~2–5 KB (JSON da release). Em dados móveis: no máx. 1 GET a cada 3 dias. O download do APK (~2,5 MB) só acontece quando VOCÊ toca em "Atualizar".
+- **Bateria:** zero em segundo plano. Sem WorkManager, sem AlarmManager, sem push, sem serviço. A verificação só acontece com o app aberto; o download fica por conta do `DownloadManager` do sistema.
+- **Armazenamento:** 5 chaves no DataStore (dia da última checagem, versão ignorada, JSON pendente, id e versão do download em andamento) + o APK baixado no diretório privado do app, apagado sozinho após a atualização.
 
 ## Arquitetura
 
 | Arquivo | Papel |
 |---|---|
-| `update/GitHubSmartUpdate.kt` | **Núcleo completo em 1 arquivo** — semver, fetch HTTP (`HttpURLConnection`, zero dependência nova), parser `org.json`, persistência DataStore, máquina de estados (`Idle / Checking / Available`), gate diário |
+| `update/GitHubSmartUpdate.kt` | **Núcleo completo em 1 arquivo** — semver (com regra de prerelease), fetch HTTP (`HttpURLConnection`, zero dependência nova), parser `org.json`, persistência DataStore, máquina de estados (`Idle / Checking / Available / Downloading / ReadyToInstall`), gate diário, download+instalação via `DownloadManager`/FileProvider |
 | `viewmodel/UpdateViewModel.kt` | Ponte para a UI; único lugar com `owner`/`repo` configurados |
-| `ui/components/UpdateBanner.kt` | Banner discreto do Home (entra/sai animado, ✕ por sessão, expandir p/ ignorar) |
+| `ui/components/UpdateBanner.kt` | Banner discreto do Home (entra/sai animado, ✕ por sessão, toque p/ expandir e ignorar, progresso do download, botão "Instalar agora") |
 | `MainActivity.kt` | Gatilho: `ON_START` → `update.onAppOpened()` |
 | `SettingsScreen.kt` | Card "Atualizações": versão instalada, "Verificar agora" (bypass do gate), baixar, ignorar |
 
@@ -88,15 +94,16 @@ Quem tem v0.3.x instalado recebe o banner no dia seguinte — ou na hora, pelo "
 O núcleo é **um único arquivo Kotlin sem dependências novas** (apenas APIs de plataforma: `HttpURLConnection`, `org.json`, DataStore Preferences).
 
 1. **Copie** `update/GitHubSmartUpdate.kt` para o outro app (ajuste o `package`)
-2. **Configure** no ViewModel: instancie com `owner`, `repo`, a versão instalada (`PackageManager.PackageInfoFlags`) e um `CoroutineScope`
-3. **Gatilho**: chame `updater.onAppOpened()` a cada `ON_START` do app
-4. **UI**: observe `state` e renderize seu banner (ou copie o `UpdateBanner.kt`)
+2. **FileProvider**: copie `res/xml/file_paths.xml` e adicione o provider no Manifest (autoridade `${applicationId}.updateprovider` — veja o `AndroidManifest.xml` deste repo; **não** é preciso `REQUEST_INSTALL_PACKAGES`)
+3. **Configure** no ViewModel: instancie com `owner`, `repo`, a versão instalada (`PackageManager.PackageInfoFlags`) e um `CoroutineScope`
+4. **Gatilho**: chame `updater.onAppOpened()` a cada `ON_START` do app
+5. **UI**: observe `state` e renderize seu banner (ou copie o `UpdateBanner.kt`) — estados `Downloading` (progresso) e `ReadyToInstall` ("Instalar agora") já vêm prontos
 
 Pronto — qualquer app Android com releases no GitHub passa a ter o mesmo OTA econômico. O `UpdateViewModel.kt` deste repositório é um exemplo completo de integração.
 
 ## FAQ
 
-**Preciso da Play Store?** Não. O download é o APK anexado na release; a instalação segue o fluxo normal do Android (permitir "instalar apps desconhecidos" para o navegador, uma vez).
+**Preciso da Play Store?** Não. "Atualizar" baixa o APK da release pelo `DownloadManager` e o "Instalar agora" abre o instalador do Android — na primeira vez o sistema pede autorização de "instalar apps desconhecidos" para o RotinaCheck (uma vez só).
 
 **E se eu nunca atualizar?** Nada quebra: o aviso continua discreto e 1 req/dia é desprezível. "Ignorar esta versão" existe exatamente para isso.
 

@@ -37,6 +37,12 @@ class UpdateViewModel(app: Application) : AndroidViewModel(app) {
 
     fun hideForSession() = updater.hideForSession()
 
+    /** One-tap update: system DownloadManager fetches the release APK. */
+    fun downloadUpdate() = updater.downloadUpdate()
+
+    /** Opens the downloaded APK in the platform installer. */
+    fun installUpdate() = updater.installUpdate()
+
     fun openDownload() = updater.openDownload(getApplication())
 
     fun consumeFeedback() = updater.consumeFeedback()

@@ -31,6 +31,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -262,7 +263,8 @@ fun SettingsScreen(
                                 )
                             }
                             Spacer(Modifier.height(8.dp))
-                            Button(onClick = update::openDownload, modifier = Modifier.fillMaxWidth()) {
+                            // One tap: system download → installer. No browser.
+                            Button(onClick = update::downloadUpdate, modifier = Modifier.fillMaxWidth()) {
                                 Text(stringResource(R.string.settings_updates_download))
                             }
                             TextButton(
@@ -270,6 +272,31 @@ fun SettingsScreen(
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
                             ) {
                                 Text(stringResource(R.string.update_ignore_version))
+                            }
+                        }
+                        is GitHubSmartUpdate.State.Downloading -> {
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                stringResource(R.string.update_downloading, st.percent),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            LinearProgressIndicator(
+                                progress = { st.percent / 100f },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        is GitHubSmartUpdate.State.ReadyToInstall -> {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                stringResource(R.string.update_ready),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Button(onClick = update::installUpdate, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(R.string.update_install_now))
                             }
                         }
                         else -> Unit

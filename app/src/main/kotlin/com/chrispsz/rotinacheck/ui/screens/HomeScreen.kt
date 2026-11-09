@@ -121,11 +121,13 @@ fun HomeScreen(
                 },
             )
 
-            // Discreet OTA card — only rendered when a newer release exists;
-            // hides for the session with ✕, quietly returns next open.
+            // Discreet OTA card — only rendered when a newer release exists,
+            // is downloading or is ready to install; hides for the session
+            // with ✕ and quietly returns on the next open.
             UpdateBanner(
                 state = update.state.collectAsStateWithLifecycle().value,
-                onUpdate = update::openDownload,
+                onUpdate = update::downloadUpdate,
+                onInstall = update::installUpdate,
                 onIgnore = update::ignoreCurrent,
                 onHide = update::hideForSession,
             )

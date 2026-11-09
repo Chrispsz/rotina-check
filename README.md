@@ -75,7 +75,7 @@ Checklist de rotina diária organizada por blocos de tempo, **um dia de cada vez
 Atualizar sem entrar no GitHub: o app verifica a release mais recente **no máximo 1× por dia** (a cada 3 dias em dados móveis) e **só com o app aberto** — nada de segundo plano, push ou bateria.
 
 - Encontrou versão nova? Um banner discreto aparece e **continua lá** (resolvido offline, sem nova rede) até você atualizar ou tocar em "Ignorar esta versão"
-- **Atualizar** abre o APK da release direto — sem navegar no repositório
+- **Atualizar em 1 toque**: download pelo sistema (com progresso, continua mesmo se fechar o app) → **"Instalar agora"** abre o instalador do Android — sem navegador, sem repositório, sem permissões novas
 - Tags `v1.2.3-test` viram *prerelease* e **não** disparam o aviso (canal estável por padrão)
 - Falha de rede? Silêncio — no dia seguinte tenta de novo
 

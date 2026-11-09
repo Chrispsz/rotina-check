@@ -94,6 +94,9 @@
     <!-- Atualizações (OTA via GitHub Releases) -->
     <string name="update_title">Nova versão %1$s disponível</string>
     <string name="update_action">Atualizar</string>
+    <string name="update_downloading">Baixando atualização… %1$d%%</string>
+    <string name="update_ready">Atualização baixada</string>
+    <string name="update_install_now">Instalar agora</string>
     <string name="update_ignore_version">Ignorar esta versão</string>
     <string name="update_hide_a11y">Ocultar aviso por agora</string>
     <string name="update_icon_a11y">Atualização disponível</string>
@@ -104,6 +107,6 @@
     <string name="settings_updates_up_to_date">Você está na versão mais recente.</string>
     <string name="settings_updates_failed">Não foi possível verificar agora — tentamos de novo mais tarde.</string>
     <string name="settings_updates_available">Nova versão %1$s disponível</string>
-    <string name="settings_updates_download">Baixar atualização</string>
+    <string name="settings_updates_download">Baixar e instalar</string>
     <string name="settings_version_installed">Versão instalada: %1$s</string>
 </resources>
