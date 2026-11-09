@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import androidx.core.net.toUri
@@ -222,9 +221,9 @@ class GitHubSmartUpdate(
             openDownload(app)
             return
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            !app.packageManager.canRequestPackageInstalls()
-        ) {
+        // (minSdk 34 ⇒ the grant check is unconditional; a port with
+        // minSdk < 26 must guard it with SDK_INT >= O.)
+        if (!app.packageManager.canRequestPackageInstalls()) {
             val gateOpened = runCatching {
                 app.startActivity(
                     Intent(

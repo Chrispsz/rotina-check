@@ -106,6 +106,7 @@ Pronto — qualquer app Android com releases no GitHub passa a ter o mesmo OTA e
 | App | Repo de releases | Notas |
 |---|---|---|
 | **RotinaCheck** | `Chrispsz/rotina-check` | APK universal único; banner Compose |
+| **SleepFlex** | `Chrispsz/sleepflex` | APK universal único; banner Compose; núcleo idêntico (`SleepFlex-vX.Y.Z.apk`) |
 | **IPLINKS TV** (tv-minimal) | `Chrispsz/tv-minimal-releases` | APKs **split por ABI** (o núcleo escolhe o do chip: arm64-v8a → armeabi-v7a → universal); UI em Views com D-pad, `SharedPreferences` em vez de DataStore; a CI do repo privado publica a release versionada estável no repo público — alvo do `releases/latest` sem autenticação |
 
 > O **NuvioTV** tem updater próprio mais completo (canais estável/beta, auto-install via `PackageInstaller`, recuperação de conflito de assinatura) — não precisa deste modelo.
