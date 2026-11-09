@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
-import androidx.core.net.toUri
+import android.os.Build
 import android.os.Environment
+import android.provider.Settings
+import androidx.core.net.toUri
 import androidx.core.content.FileProvider
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -53,10 +55,13 @@ import java.net.URL
  *     cleaned up locally by version comparison — again, no network needed.
  *  8. One-tap update: "Atualizar" hands the APK to the system [DownloadManager]
  *     (system notification while it runs, survives process death) and the
- *     finished APK opens in the platform installer via FileProvider. No new
- *     permissions — REQUEST_INSTALL_PACKAGES is NOT needed for the
- *     ACTION_VIEW path, the system installer owns the unknown-source UX.
- *     If anything in the download path fails, we fall back to the browser.
+ *     finished APK opens in the platform installer via FileProvider. The host
+ *     app MUST declare REQUEST_INSTALL_PACKAGES (a normal, install-time
+ *     permission): without it the platform installer SILENTLY refuses the
+ *     ACTION_VIEW flow on Android 8+ — the "Instalar agora" tap does
+ *     nothing. [installUpdate] drives the one-time "Allow from this source"
+ *     gate itself. If anything in the download path fails, we fall back to
+ *     the browser.
  *
  * Network contract: one HTTPS GET to `repos/{owner}/{repo}/releases/latest`
  * per day plus the explicit APK download the user asked for. GitHub's
@@ -66,9 +71,9 @@ import java.net.URL
  * REUSE IN ANOTHER APP: this file is self-contained (HttpURLConnection +
  * DownloadManager + FileProvider + org.json + Preferences DataStore — all
  * platform APIs, no new dependency, no string resources). Copy it, add the
- * FileProvider to your manifest, call [onAppOpened] on every foreground
- * entry, observe [state], and render the banner. That's the entire
- * integration.
+ * FileProvider AND the REQUEST_INSTALL_PACKAGES permission to your manifest,
+ * call [onAppOpened] on every foreground entry, observe [state], and render
+ * the banner. That's the entire integration.
  */
 class GitHubSmartUpdate(
     context: Context,
@@ -196,6 +201,14 @@ class GitHubSmartUpdate(
 
     /**
      * Opens the finished APK in the platform installer (FileProvider URI).
+     *
+     * Android 8+ gate: the very first install needs the one-time "Allow from
+     * this source" grant for THIS app. Without it the platform installer
+     * silently refuses the ACTION_VIEW intent (tap does nothing). So we check
+     * [PackageManager.canRequestPackageInstalls] first and, if needed, open
+     * the exact per-app settings page — the state stays ReadyToInstall, and
+     * the next "Instalar agora" tap lands straight in the installer.
+     *
      * If the file is somehow gone, the state is cleaned and we fall back to
      * the release page in the browser.
      */
@@ -208,6 +221,22 @@ class GitHubSmartUpdate(
             scope.launch { clearDownloadState() }
             openDownload(app)
             return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            !app.packageManager.canRequestPackageInstalls()
+        ) {
+            val gateOpened = runCatching {
+                app.startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        "package:${app.packageName}".toUri(),
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                )
+            }.isSuccess
+            // Gate handled → user enables the toggle and taps again.
+            // Exotic device without that settings screen → fall through and
+            // let the platform installer show its own gate (or fail again).
+            if (gateOpened) return
         }
         runCatching {
             val uri = FileProvider.getUriForFile(app, "${app.packageName}.updateprovider", file)

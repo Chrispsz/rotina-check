@@ -25,6 +25,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- ======================================================================
+         OTA em 1 toque: SEM esta permissão o instalador do Android 8+
+         recusa o fluxo EM SILÊNCIO — o toque em "Instalar agora" não abre
+         nada (bug da v0.4.1/v0.4.2). É uma permissão normal, concedida na
+         instalação, sem prompt em runtime: ela apenas permite que o sistema
+         mostre o gate único "Permitir deste app" para o RotinaCheck.
+         ====================================================================== -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -49,8 +58,9 @@
 
         <!-- One-tap OTA install: the finished APK (app-private external dir)
              is handed to the platform installer through this provider. The
-             ACTION_VIEW path needs NO REQUEST_INSTALL_PACKAGES — the system
-             installer owns the unknown-source UX. -->
+             caller must hold REQUEST_INSTALL_PACKAGES (declared above) —
+             without it the installer silently refuses the ACTION_VIEW flow
+             on Android 8+. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.updateprovider"

@@ -32,8 +32,8 @@ android {
         // stable, java.time is always present, no desugaring, no SDK guards.
         minSdk = 34
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.4.2"
+        versionCode = 8
+        versionName = "0.4.3"
     }
 
     buildTypes {

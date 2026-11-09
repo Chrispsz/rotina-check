@@ -20,7 +20,7 @@ Um updater não pode ser chato. Muitos apps pecam: checam toda hora, abrem diál
 | 📶 Econômico com dados móveis | Em rede medida, só verifica de novo após 3 dias — o Wi‑Fi faz o trabalho diário |
 | 🔕 Falha silenciosa | Sem internet/timeout/erro = nada acontece; amanhã tenta de novo (e a tentativa também conta como "checado hoje") |
 | 📴 Offline-first | A atualização encontrada fica salva; o banner reaparece a cada abertura **sem rede nenhuma** |
-| 👆 Atualizar em 1 toque | Download pelo `DownloadManager` do sistema (notificação nativa, sobrevive ao fechamento do app) e instalação direta via instalador do Android — sem navegador e sem novas permissões |
+| 👆 Atualizar em 1 toque | Download pelo `DownloadManager` do sistema (notificação nativa, sobrevive ao fechamento do app) e instalação direta via instalador do Android — sem navegador. Na 1ª instalação o app abre o gate único "Permitir deste app" e o banner continua em "Instalar agora" |
 | 🙈 Ignorar esta versão | A versão ignorada nunca mais avisa; uma versão **mais nova** sempre avisa |
 | ✨ Auto-limpeza pós-atualização | Instalou a nova versão? O estado pendente é limpo comparando versões localmente — sem rede |
 | 🧪 Canal estável | `releases/latest` ignora drafts e prereleases — tags `v1.2.3-test` nunca disparam o banner |
@@ -94,7 +94,7 @@ Quem tem v0.3.x instalado recebe o banner no dia seguinte — ou na hora, pelo "
 O núcleo é **um único arquivo Kotlin sem dependências novas** (apenas APIs de plataforma: `HttpURLConnection`, `org.json`, DataStore Preferences).
 
 1. **Copie** `update/GitHubSmartUpdate.kt` para o outro app (ajuste o `package`)
-2. **FileProvider**: copie `res/xml/file_paths.xml` e adicione o provider no Manifest (autoridade `${applicationId}.updateprovider` — veja o `AndroidManifest.xml` deste repo; **não** é preciso `REQUEST_INSTALL_PACKAGES`)
+2. **FileProvider + permissão**: copie `res/xml/file_paths.xml` e adicione no Manifest o provider (autoridade `${applicationId}.updateprovider`) **e** `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />` — permissão normal, concedida na instalação. Sem ela o instalador do Android 8+ recusa o fluxo **em silêncio**: o toque em "Instalar agora" não abre nada (bug real da v0.4.1/v0.4.2). O `installUpdate()` também cuida do gate único "Permitir deste app"
 3. **Configure** no ViewModel: instancie com `owner`, `repo`, a versão instalada (`PackageManager.PackageInfoFlags`) e um `CoroutineScope`
 4. **Gatilho**: chame `updater.onAppOpened()` a cada `ON_START` do app
 5. **UI**: observe `state` e renderize seu banner (ou copie o `UpdateBanner.kt`) — estados `Downloading` (progresso) e `ReadyToInstall` ("Instalar agora") já vêm prontos
