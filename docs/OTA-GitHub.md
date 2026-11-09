@@ -101,6 +101,15 @@ O núcleo é **um único arquivo Kotlin sem dependências novas** (apenas APIs d
 
 Pronto — qualquer app Android com releases no GitHub passa a ter o mesmo OTA econômico. O `UpdateViewModel.kt` deste repositório é um exemplo completo de integração.
 
+### Apps usando este modelo
+
+| App | Repo de releases | Notas |
+|---|---|---|
+| **RotinaCheck** | `Chrispsz/rotina-check` | APK universal único; banner Compose |
+| **IPLINKS TV** (tv-minimal) | `Chrispsz/tv-minimal-releases` | APKs **split por ABI** (o núcleo escolhe o do chip: arm64-v8a → armeabi-v7a → universal); UI em Views com D-pad, `SharedPreferences` em vez de DataStore; a CI do repo privado publica a release versionada estável no repo público — alvo do `releases/latest` sem autenticação |
+
+> O **NuvioTV** tem updater próprio mais completo (canais estável/beta, auto-install via `PackageInstaller`, recuperação de conflito de assinatura) — não precisa deste modelo.
+
 ## FAQ
 
 **Preciso da Play Store?** Não. "Atualizar" baixa o APK da release pelo `DownloadManager` e o "Instalar agora" abre o instalador do Android — na primeira vez o sistema pede autorização de "instalar apps desconhecidos" para o RotinaCheck (uma vez só).
