@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Minimalist checklist glyph: three task bars + amber completion badge.
+     Drawn inside the adaptive-icon safe zone (center 66/108). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Task bars (off-white, rounded caps) -->
+    <path
+        android:pathData="M34,40 L74,40"
+        android:strokeColor="#F2EDE4"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M34,55 L74,55"
+        android:strokeColor="#F2EDE4"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M34,70 L52,70"
+        android:strokeColor="#F2EDE4"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <!-- Completion badge (amber disc + black check) -->
+    <path
+        android:pathData="M66,70 m-12,0 a12,12 0 1,1 24,0 a12,12 0 1,1 -24,0"
+        android:fillColor="#F2B36B" />
+    <path
+        android:pathData="M60.5,70 L64.5,74 L71.5,65.5"
+        android:strokeColor="#241703"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

@@ -1,0 +1,68 @@
+# ============================================================================
+# RotinaCheck — Gradle Version Catalog
+# Single source of truth for every dependency & plugin version.
+# Sibling of SleepFlex's catalog: same toolchain, persistence trimmed to
+# DataStore (no Room/Hilt/KSP) for an ultra-light APK.
+# ============================================================================
+
+[versions]
+# Build toolchain
+agp = "8.13.2"
+kotlin = "2.2.20"
+
+# Compose (BOM pins all androidx.compose.* artifacts)
+composeBom = "2025.10.00"
+materialIconsExtended = "1.7.8"
+
+# AndroidX core
+coreKtx = "1.17.0"
+activityCompose = "1.11.0"
+lifecycle = "2.9.4"
+datastore = "1.1.7"
+
+# Coroutines
+coroutines = "1.10.2"
+
+# Testing (JUnit 5 via de.mannodermaus android-junit5 plugin)
+junit5 = "5.12.2"
+androidJunit5Plugin = "1.12.0.0"
+# Platform org.json is stubbed in android.jar for JVM tests — same API from Maven.
+orgJson = "20240303"
+
+[libraries]
+# --- AndroidX core -----------------------------------------------------------
+androidx-core-ktx              = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-activity-compose      = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+
+# --- Lifecycle (lifecycle-aware scopes: collectAsStateWithLifecycle...) -------
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+
+# --- Compose (versions come from the BOM) ------------------------------------
+compose-bom                    = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-ui                     = { module = "androidx.compose.ui:ui" }
+compose-ui-graphics            = { module = "androidx.compose.ui:ui-graphics" }
+compose-ui-tooling             = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-tooling-preview     = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-material3              = { module = "androidx.compose.material3:material3" }
+compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+
+# --- Persistence (the ONLY storage layer — 100% local) -------------------------
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+
+# --- Coroutines ------------------------------------------------------------------
+kotlinx-coroutines-android     = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# --- Unit testing (JUnit 5 / Jupiter) ---------------------------------------------
+junit-bom                      = { module = "org.junit:junit-bom", version.ref = "junit5" }
+junit-jupiter                  = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher        = { module = "org.junit.platform:junit-platform-launcher" }
+kotlin-test-junit5             = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+org-json                       = { module = "org.json:json", version.ref = "orgJson" }
+
+[plugins]
+android-application            = { id = "com.android.application", version.ref = "agp" }
+kotlin-android                 = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose                 = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-junit5                 = { id = "de.mannodermaus.android-junit5", version.ref = "androidJunit5Plugin" }

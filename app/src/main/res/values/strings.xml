@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RotinaCheck</string>
+
+    <!-- Dias da semana -->
+    <string name="view_other_day">Visualizando %1$s — as marcações valem só para hoje.</string>
+    <string name="back_to_today">Voltar para hoje</string>
+
+    <!-- Estado vazio -->
+    <string name="empty_title">Comece com uma rotina</string>
+    <string name="empty_body">Use o exemplo já pronto, crie a sua do zero ou importe um arquivo .json.</string>
+    <string name="empty_use_example">Usar rotina de exemplo</string>
+    <string name="empty_start_scratch">Criar do zero</string>
+    <string name="empty_import">Importar arquivo .json</string>
+
+    <!-- Tela principal -->
+    <string name="progress_a11y">Progresso do dia: %1$d por cento</string>
+    <string name="consistency_label">%1$d/7 dias</string>
+    <string name="consistency_a11y">Consistência dos últimos 7 dias</string>
+    <string name="consistency_reset_a11y">Resetar histórico</string>
+    <string name="block_toggle_a11y">Expandir bloco</string>
+    <string name="block_edit_a11y">Editar bloco</string>
+    <string name="task_check_a11y">Marcar tarefa</string>
+    <string name="block_tasks_count">%1$d tarefas · %2$s</string>
+    <string name="block_open_now">Agora</string>
+    <string name="block_no_name">Sem nome</string>
+    <string name="block_no_tasks">Nenhuma tarefa ainda — toque no lápis para adicionar.</string>
+    <string name="no_time">Sem horário</string>
+    <string name="hero_now">Agora</string>
+    <string name="hero_next">Próximo</string>
+    <string name="hero_minutes_left">Faltam %1$s</string>
+    <string name="hero_starts_in">Começa em %1$s</string>
+    <string name="hero_open_ended">Bloco aberto</string>
+    <string name="hero_idle">Nenhum bloco ativo neste horário.</string>
+    <string name="hero_summary">%1$d blocos · %2$d tarefas</string>
+    <string name="day_missing_title">Nada neste dia ainda</string>
+    <string name="day_missing_body">Toque em + para criar o primeiro bloco deste dia.</string>
+    <string name="topbar_settings_a11y">Configurações</string>
+    <string name="topbar_back_a11y">Voltar</string>
+    <string name="fab_new_block_a11y">Novo bloco</string>
+
+    <!-- Configurações -->
+    <string name="settings_title">Configurações</string>
+    <string name="settings_import">Importar rotina (.json)</string>
+    <string name="settings_export">Exportar backup (.json)</string>
+    <string name="settings_clear">Limpar dados</string>
+    <string name="settings_clear_confirm_title">Limpar tudo?</string>
+    <string name="settings_clear_confirm_body">Rotina, marcações e histórico serão apagados.</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_clear">Limpar</string>
+    <string name="settings_alerts">Alertas dos blocos</string>
+    <string name="settings_alerts_desc">Aviso discreto no início e no fim de cada bloco</string>
+    <string name="settings_example_title">Rotina de exemplo</string>
+    <string name="settings_example_desc">Recarrega a rotina que já vem no app. Suas marcações são mantidas.</string>
+    <string name="settings_example_action">Restaurar</string>
+
+    <!-- Avisos de permissão -->
+    <string name="banner_notifications">Ative as notificações para receber os alertas.</string>
+    <string name="banner_exact">Permita alarmes exatos para horários precisos.</string>
+    <string name="banner_exact_action">Permitir</string>
+
+    <!-- Editor de bloco -->
+    <string name="editor_title">Editar: %1$s</string>
+    <string name="editor_name_label">Nome do bloco</string>
+    <string name="editor_start_label">Início</string>
+    <string name="editor_end_label">Fim</string>
+    <string name="editor_no_end">Sem horário de fim</string>
+    <string name="editor_tasks_label">Tarefas</string>
+    <string name="editor_add_task">Nova tarefa</string>
+    <string name="editor_add_a11y">Adicionar tarefa</string>
+    <string name="editor_remove_task_a11y">Remover tarefa</string>
+    <string name="editor_delete_block">Excluir bloco</string>
+    <string name="editor_delete_confirm_title">Excluir bloco?</string>
+    <string name="editor_delete_confirm_body">"%1$s" e suas marcações serão removidos.</string>
+    <string name="action_delete">Excluir</string>
+    <string name="editor_save">Salvar</string>
+    <string name="editor_pick_time_a11y">Escolher horário</string>
+    <string name="editor_new_block_default">Novo bloco</string>
+
+    <!-- Notificações -->
+    <string name="notif_channel">Alertas da rotina</string>
+    <string name="notif_channel_desc">Avisos discretos nos horários dos blocos</string>
+    <string name="notif_start_body">Começou agora · %1$s</string>
+    <string name="notif_end_body">Terminou agora · %1$s</string>
+
+    <!-- Mensagens -->
+    <string name="msg_imported">Rotina importada</string>
+    <string name="msg_import_error">Arquivo inválido: %1$s</string>
+    <string name="msg_exported">Backup salvo</string>
+    <string name="msg_cleared">Dados apagados</string>
+    <string name="msg_example_restored">Rotina de exemplo restaurada</string>
+    <string name="msg_scratch_created">Rotina em branco criada — toque em + para adicionar blocos</string>
+</resources>
